@@ -462,6 +462,8 @@ export const doctrineDecisions = pgTable(
     principle: integer('principle'),
     title: text('title').notNull(),
     rationale: text('rationale'),
+    // explicit trade-off accepted by the decision (required by the form)
+    tradeOff: text('trade_off'),
     decidedBy: uuid('decided_by')
       .notNull()
       .references(() => users.id),

@@ -50,6 +50,13 @@
       "when": 1782646633879,
       "tag": "0006_slippery_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782646995043,
+      "tag": "0007_careless_emma_frost",
+      "breakpoints": true
     }
   ]
 }

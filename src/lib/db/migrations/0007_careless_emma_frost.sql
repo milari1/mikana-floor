@@ -1,0 +1,1 @@
+ALTER TABLE "doctrine_decisions" ADD COLUMN "trade_off" text;
