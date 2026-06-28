@@ -2,17 +2,20 @@
 
 import { useEffect } from 'react';
 
-import { drainStops } from '@/lib/offline/sync';
+import { primeStandardsCache } from '@/lib/offline/standards';
+import { drainQueue } from '@/lib/offline/sync';
 
 /**
- * Drains the offline stop queue on mount and whenever the device comes back
- * online. Renders nothing. (Prompt 8 adds a Service Worker Background Sync
- * path and the visible offline/queue-depth indicator.)
+ * On crew load and whenever the device comes back online: drain the offline
+ * write queue (stops + completions) and prime the standards cache so
+ * checklists work offline. Renders nothing. (Prompt 8 adds Background Sync and
+ * the visible offline/queue-depth indicator.)
  */
 export function CrewOfflineSync() {
   useEffect(() => {
     const run = () => {
-      void drainStops();
+      void drainQueue();
+      void primeStandardsCache();
     };
     run();
     window.addEventListener('online', run);

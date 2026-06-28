@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { auth } from '@/lib/auth';
+import { completionPayloadSchema } from '@/lib/checklist';
+import { createCompletion } from '@/lib/standards';
 import { createStop } from '@/lib/stops';
 import { stopPayloadSchema } from '@/lib/stop-taxonomy';
 
 const syncSchema = z.object({
   stops: z.array(stopPayloadSchema).default([]),
+  completions: z.array(completionPayloadSchema).default([]),
 });
 
 /**
@@ -28,18 +31,32 @@ export async function POST(req: Request) {
   }
 
   const actor = { id: session.user.id!, siteId: session.user.siteId };
-  const ids: string[] = [];
-  const failed: number[] = [];
+  const stopIds: string[] = [];
+  const completionIds: string[] = [];
 
-  const queued = parsed.data.stops;
-  for (let i = 0; i < queued.length; i++) {
+  const queuedStops = parsed.data.stops;
+  for (let i = 0; i < queuedStops.length; i++) {
     try {
-      const { id } = await createStop(actor, queued[i]);
-      ids.push(id);
+      const { id } = await createStop(actor, queuedStops[i]);
+      stopIds.push(id);
     } catch {
-      failed.push(i);
+      /* skip failed item */
     }
   }
 
-  return NextResponse.json({ synced: ids.length, ids, failed });
+  const queuedCompletions = parsed.data.completions;
+  for (let i = 0; i < queuedCompletions.length; i++) {
+    try {
+      const { id } = await createCompletion(actor, queuedCompletions[i]);
+      completionIds.push(id);
+    } catch {
+      /* skip failed item */
+    }
+  }
+
+  return NextResponse.json({
+    synced: stopIds.length + completionIds.length,
+    stops: stopIds,
+    completions: completionIds,
+  });
 }

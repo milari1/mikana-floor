@@ -142,8 +142,13 @@ export const standards = pgTable(
   {
     id: pk(),
     station: text('station').notNull(),
+    // opening | prep | service | closing | par-check
+    phase: text('phase'),
+    title: text('title'),
     version: integer('version').notNull().default(1),
-    bodyMd: text('body_md').notNull(),
+    bodyMd: text('body_md'),
+    // structured steps: [{ name, detail_md, photo_url? }]
+    stepsJson: jsonb('steps_json'),
     photoUrl: text('photo_url'),
     effectiveAt: timestamp('effective_at', { withTimezone: true }),
     // self-reference: the standard this version supersedes
@@ -158,6 +163,7 @@ export const standards = pgTable(
   },
   (t) => [
     index('standards_station_idx').on(t.station),
+    index('standards_station_phase_idx').on(t.station, t.phase),
     index('standards_supersedes_idx').on(t.supersedesId),
     index('standards_author_idx').on(t.authorId),
     index('standards_approved_by_idx').on(t.approvedBy),
@@ -178,6 +184,12 @@ export const standardCompletions = pgTable(
       .references(() => standards.id),
     // the version of the standard the user actually saw
     standardVersion: integer('standard_version').notNull(),
+    // which step within the standard (null = whole-standard completion)
+    stepIndex: integer('step_index'),
+    stepName: text('step_name'),
+    // done | skipped | cant_complete_equipment | cant_complete_ingredient | needs_help
+    status: text('status').notNull().default('done'),
+    reason: text('reason'),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id),

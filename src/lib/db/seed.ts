@@ -75,27 +75,69 @@ async function main() {
   await db.insert(standards).values([
     {
       station: 'Receiving Dock',
+      phase: 'opening',
+      title: 'Receiving Dock — Opening',
       version: 1,
-      bodyMd:
-        '# Receiving Dock SOP\n\n1. Verify temperature on arrival.\n2. Inspect packaging for damage.\n3. Photograph and log any rejections.',
+      bodyMd: '# Receiving Dock SOP',
+      stepsJson: [
+        {
+          name: 'Verify delivery temperature',
+          detail_md: 'Probe each cold load on arrival. Reject above 41°F.',
+        },
+        {
+          name: 'Inspect packaging',
+          detail_md: 'Check for damage, leaks, and pest signs.',
+        },
+        {
+          name: 'Log and photograph rejections',
+          detail_md: 'Record any rejected items with a photo.',
+        },
+      ],
       effectiveAt: now,
       authorId: userIds.gm,
       approvedBy: userIds.director,
     },
     {
       station: 'Cold Prep',
+      phase: 'prep',
+      title: 'Cold Prep — Prep',
       version: 1,
-      bodyMd:
-        '# Cold Prep SOP\n\n1. Sanitize surfaces before start.\n2. Keep product below 41°F.\n3. Label with prep time and use-by.',
+      bodyMd: '# Cold Prep SOP',
+      stepsJson: [
+        {
+          name: 'Sanitize surfaces',
+          detail_md: 'Sanitize all surfaces and tools before starting.',
+        },
+        { name: 'Hold product below 41°F', detail_md: 'Keep product cold.' },
+        {
+          name: 'Label prep time and use-by',
+          detail_md: 'Every container gets a prep time and use-by label.',
+        },
+      ],
       effectiveAt: now,
       authorId: userIds.gm,
       approvedBy: userIds.director,
     },
     {
       station: 'Final Plating',
+      phase: 'service',
+      title: 'Final Plating — Service',
       version: 1,
-      bodyMd:
-        '# Final Plating SOP\n\n1. Confirm allergen separation.\n2. Check portion against spec card.\n3. Wipe rims; hold at temperature.',
+      bodyMd: '# Final Plating SOP',
+      stepsJson: [
+        {
+          name: 'Confirm allergen separation',
+          detail_md: 'Verify allergen-free items stayed separated.',
+        },
+        {
+          name: 'Check portion vs spec card',
+          detail_md: 'Compare portion to the active spec card.',
+        },
+        {
+          name: 'Wipe rims, hold at temperature',
+          detail_md: 'Clean plate rims; hold at service temperature.',
+        },
+      ],
       effectiveAt: now,
       authorId: userIds.gm,
       approvedBy: userIds.director,
