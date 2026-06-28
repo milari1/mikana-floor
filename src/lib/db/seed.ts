@@ -16,6 +16,7 @@ import { sites, users, standards } from './schema';
 async function main() {
   const now = new Date();
   const passwordHash = bcrypt.hashSync('mikana-dev-password', 10);
+  const hashPin = (pin: string) => bcrypt.hashSync(pin, 10);
 
   /* ---------------------------------------------------------------- sites */
   const siteIds = {
@@ -41,13 +42,15 @@ async function main() {
   /* ---------------------------------------------------------------- users */
   // One per role except auditor. The role enum has 7 values; excluding
   // `auditor` leaves 6 (the build prompt's "5" undercounts the enum).
+  // Floor roles (crew/receiver/mod) sign in with a site + 4-digit PIN.
+  // GM and above (gm/director/exec) sign in with an email magic link.
   const seedUsers = [
-    { role: 'crew' as const, name: 'Casey Crew', siteId: siteIds.catering },
-    { role: 'receiver' as const, name: 'Riley Receiver', siteId: siteIds.distribution },
-    { role: 'mod' as const, name: 'Morgan Manager-on-Duty', siteId: siteIds.catering },
-    { role: 'gm' as const, name: 'Gabi GM', siteId: siteIds.catering },
-    { role: 'director' as const, name: 'Dana Director', siteId: null },
-    { role: 'exec' as const, name: 'Eli Exec', siteId: null },
+    { role: 'crew' as const, name: 'Casey Crew', siteId: siteIds.catering, pin: '1234' },
+    { role: 'receiver' as const, name: 'Riley Receiver', siteId: siteIds.distribution, pin: '2345' },
+    { role: 'mod' as const, name: 'Morgan Manager-on-Duty', siteId: siteIds.catering, pin: '3456' },
+    { role: 'gm' as const, name: 'Gabi GM', siteId: siteIds.catering, pin: null },
+    { role: 'director' as const, name: 'Dana Director', siteId: null, pin: null },
+    { role: 'exec' as const, name: 'Eli Exec', siteId: null, pin: null },
   ];
 
   const userIds: Record<string, string> = {};
@@ -61,6 +64,7 @@ async function main() {
         name: u.name,
         role: u.role,
         passwordHash,
+        pinHash: u.pin ? hashPin(u.pin) : null,
         siteId: u.siteId,
         active: true,
       };
@@ -102,6 +106,10 @@ async function main() {
   console.log(`  sites:     ${Object.keys(siteIds).length}`);
   console.log(`  users:     ${seedUsers.length}`);
   console.log(`  standards: 3`);
+  console.log('\nDev crew PINs (site + pin):');
+  console.log(`  Casey Crew     @ Catering     pin 1234`);
+  console.log(`  Riley Receiver @ Distribution pin 2345`);
+  console.log(`  Morgan MoD     @ Catering     pin 3456`);
 }
 
 main()

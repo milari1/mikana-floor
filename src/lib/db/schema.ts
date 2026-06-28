@@ -10,6 +10,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  primaryKey,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 
@@ -81,6 +82,8 @@ export const users = pgTable(
     name: text('name').notNull(),
     role: userRoleEnum('role').notNull(),
     passwordHash: text('password_hash'),
+    // bcrypt hash of a 4-digit PIN for shared-device (crew) sign-in
+    pinHash: text('pin_hash'),
     siteId: uuid('site_id').references(() => sites.id),
     active: boolean('active').notNull().default(true),
     createdAt: createdAt(),
@@ -469,6 +472,20 @@ export const auditLog = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  verification_tokens (Auth.js magic-link tokens)                            */
+/* -------------------------------------------------------------------------- */
+
+export const verificationTokens = pgTable(
+  'verification_tokens',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { withTimezone: true }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
+);
+
+/* -------------------------------------------------------------------------- */
 /*  Inferred types                                                             */
 /* -------------------------------------------------------------------------- */
 
@@ -504,3 +521,5 @@ export type DoctrineDecision = typeof doctrineDecisions.$inferSelect;
 export type NewDoctrineDecision = typeof doctrineDecisions.$inferInsert;
 export type AuditLogEntry = typeof auditLog.$inferSelect;
 export type NewAuditLogEntry = typeof auditLog.$inferInsert;
+export type VerificationToken = typeof verificationTokens.$inferSelect;
+export type NewVerificationToken = typeof verificationTokens.$inferInsert;
