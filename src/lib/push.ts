@@ -35,3 +35,11 @@ export async function notifyMod(mod: SiteMod, stopId: string): Promise<void> {
   }
   console.info(`[push] (stub) would notify MOD ${mod.name} about stop ${stopId}`);
 }
+
+/**
+ * Notify the buyer of an intake rejection.
+ * TODO(Prompt 9): real Web Push once subscriptions + VAPID are wired.
+ */
+export async function notifyBuyer(siteId: string, ref: string): Promise<void> {
+  console.info(`[push] (stub) would notify buyer for site ${siteId} about ${ref}`);
+}

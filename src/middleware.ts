@@ -30,6 +30,9 @@ export default auth((req) => {
     allowed = !!role && atLeast(role, 'director');
   } else if (pathname.startsWith('/gm')) {
     allowed = !!role && atLeast(role, 'mod');
+  } else if (pathname.startsWith('/crew/intake')) {
+    // Receiving is a receiver-and-above task (not general crew).
+    allowed = !!role && atLeast(role, 'receiver');
   } else if (pathname.startsWith('/crew')) {
     allowed = !!role && atLeast(role, 'crew');
   } else {

@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 
 import type { ChecklistStandard, CompletionPayload } from '@/lib/checklist';
+import type { IntakePayload, QualityPayload } from '@/lib/quality-types';
 import type { StopPayload } from '@/lib/stop-taxonomy';
 
 export interface OfflineStop {
@@ -15,6 +16,18 @@ export interface OfflineCompletion {
   queuedAt: string;
 }
 
+export interface OfflineQuality {
+  clientId: string;
+  payload: QualityPayload;
+  queuedAt: string;
+}
+
+export interface OfflineIntake {
+  clientId: string;
+  payload: IntakePayload;
+  queuedAt: string;
+}
+
 /**
  * Client-side offline store (IndexedDB via Dexie).
  * - offlineStops / offlineCompletions: writes queued while offline, replayed
@@ -25,6 +38,8 @@ export interface OfflineCompletion {
 class MikanaOfflineDb extends Dexie {
   offlineStops!: Table<OfflineStop, string>;
   offlineCompletions!: Table<OfflineCompletion, string>;
+  offlineQuality!: Table<OfflineQuality, string>;
+  offlineIntake!: Table<OfflineIntake, string>;
   cachedStandards!: Table<ChecklistStandard, string>;
 
   constructor() {
@@ -37,6 +52,13 @@ class MikanaOfflineDb extends Dexie {
       offlineCompletions: 'clientId, queuedAt',
       cachedStandards: 'id, station',
     });
+    this.version(3).stores({
+      offlineStops: 'clientId, queuedAt',
+      offlineCompletions: 'clientId, queuedAt',
+      offlineQuality: 'clientId, queuedAt',
+      offlineIntake: 'clientId, queuedAt',
+      cachedStandards: 'id, station',
+    });
   }
 }
 
@@ -47,9 +69,11 @@ export async function offlineStopCount(): Promise<number> {
 }
 
 export async function offlineQueueDepth(): Promise<number> {
-  const [stops, completions] = await Promise.all([
+  const [stops, completions, quality, intake] = await Promise.all([
     offlineDb.offlineStops.count(),
     offlineDb.offlineCompletions.count(),
+    offlineDb.offlineQuality.count(),
+    offlineDb.offlineIntake.count(),
   ]);
-  return stops + completions;
+  return stops + completions + quality + intake;
 }

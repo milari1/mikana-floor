@@ -3,6 +3,12 @@ import { z } from 'zod';
 
 import { auth } from '@/lib/auth';
 import { completionPayloadSchema } from '@/lib/checklist';
+import { createIntakeEvent } from '@/lib/intake';
+import { createQualityEvent } from '@/lib/quality';
+import {
+  intakePayloadSchema,
+  qualityPayloadSchema,
+} from '@/lib/quality-types';
 import { createCompletion } from '@/lib/standards';
 import { createStop } from '@/lib/stops';
 import { stopPayloadSchema } from '@/lib/stop-taxonomy';
@@ -10,6 +16,8 @@ import { stopPayloadSchema } from '@/lib/stop-taxonomy';
 const syncSchema = z.object({
   stops: z.array(stopPayloadSchema).default([]),
   completions: z.array(completionPayloadSchema).default([]),
+  quality: z.array(qualityPayloadSchema).default([]),
+  intake: z.array(intakePayloadSchema).default([]),
 });
 
 /**
@@ -54,9 +62,37 @@ export async function POST(req: Request) {
     }
   }
 
+  const qualityIds: string[] = [];
+  const queuedQuality = parsed.data.quality;
+  for (let i = 0; i < queuedQuality.length; i++) {
+    try {
+      const { id } = await createQualityEvent(actor, queuedQuality[i]);
+      qualityIds.push(id);
+    } catch {
+      /* skip failed item */
+    }
+  }
+
+  const intakeIds: string[] = [];
+  const queuedIntake = parsed.data.intake;
+  for (let i = 0; i < queuedIntake.length; i++) {
+    try {
+      const { id } = await createIntakeEvent(actor, queuedIntake[i]);
+      intakeIds.push(id);
+    } catch {
+      /* skip failed item */
+    }
+  }
+
   return NextResponse.json({
-    synced: stopIds.length + completionIds.length,
+    synced:
+      stopIds.length +
+      completionIds.length +
+      qualityIds.length +
+      intakeIds.length,
     stops: stopIds,
     completions: completionIds,
+    quality: qualityIds,
+    intake: intakeIds,
   });
 }
