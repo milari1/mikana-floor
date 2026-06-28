@@ -264,8 +264,12 @@ export const kaizenItems = pgTable(
       .notNull()
       .references(() => sites.id),
     stopId: uuid('stop_id').references(() => stops.id),
-    title: text('title').notNull(),
+    title: text('title'),
     description: text('description'),
+    // raw transcript captured by voice/text
+    rawText: text('raw_text'),
+    // audio is discarded after transcription; only the GM huddle may set true
+    audioRetain: boolean('audio_retain').notNull().default(false),
     // open | in_progress | done | dropped
     status: text('status').notNull().default('open'),
     proposedBy: uuid('proposed_by')
