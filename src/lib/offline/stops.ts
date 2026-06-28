@@ -1,5 +1,6 @@
 import type { StopPayload } from '@/lib/stop-taxonomy';
 
+import { registerReplaySync } from './background-sync';
 import { offlineDb } from './db';
 
 export type SubmitStopResult =
@@ -12,6 +13,7 @@ export async function enqueueStop(payload: StopPayload): Promise<void> {
     payload,
     queuedAt: new Date().toISOString(),
   });
+  await registerReplaySync();
 }
 
 /**

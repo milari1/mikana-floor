@@ -1,5 +1,6 @@
 import type { IntakePayload } from '@/lib/quality-types';
 
+import { registerReplaySync } from './background-sync';
 import { offlineDb } from './db';
 
 export type SubmitIntakeResult = { queued: boolean };
@@ -10,6 +11,7 @@ export async function enqueueIntake(payload: IntakePayload): Promise<void> {
     payload,
     queuedAt: new Date().toISOString(),
   });
+  await registerReplaySync();
 }
 
 export async function submitIntake(

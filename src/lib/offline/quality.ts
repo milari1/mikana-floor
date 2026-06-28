@@ -1,5 +1,6 @@
 import type { QualityPayload } from '@/lib/quality-types';
 
+import { registerReplaySync } from './background-sync';
 import { offlineDb } from './db';
 
 export type SubmitQualityResult =
@@ -12,6 +13,7 @@ export async function enqueueQuality(payload: QualityPayload): Promise<void> {
     payload,
     queuedAt: new Date().toISOString(),
   });
+  await registerReplaySync();
 }
 
 export async function submitQuality(

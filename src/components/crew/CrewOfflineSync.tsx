@@ -19,7 +19,17 @@ export function CrewOfflineSync() {
     };
     run();
     window.addEventListener('online', run);
-    return () => window.removeEventListener('online', run);
+
+    // The Service Worker's Background Sync handler asks clients to drain.
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'replay-queue') void drainQueue();
+    };
+    navigator.serviceWorker?.addEventListener('message', onMessage);
+
+    return () => {
+      window.removeEventListener('online', run);
+      navigator.serviceWorker?.removeEventListener('message', onMessage);
+    };
   }, []);
 
   return null;

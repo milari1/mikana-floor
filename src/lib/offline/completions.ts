@@ -1,5 +1,6 @@
 import type { CompletionPayload } from '@/lib/checklist';
 
+import { registerReplaySync } from './background-sync';
 import { offlineDb } from './db';
 
 export type SubmitCompletionResult = { queued: boolean };
@@ -12,6 +13,7 @@ export async function enqueueCompletion(
     payload,
     queuedAt: new Date().toISOString(),
   });
+  await registerReplaySync();
 }
 
 /** Record a step completion. Online: POST; offline / on failure: queue. */
