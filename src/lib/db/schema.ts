@@ -208,12 +208,20 @@ export const stops = pgTable(
       .notNull()
       .references(() => sites.id),
     shiftId: uuid('shift_id').references(() => shifts.id),
+    station: text('station'),
     category: stopCategoryEnum('category').notNull(),
-    description: text('description').notNull(),
+    subcategory: text('subcategory'),
+    // optional free-text / voice detail added by the person raising the stop
+    description: text('description'),
+    openedAt: timestamp('opened_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     raisedBy: uuid('raised_by')
       .notNull()
       .references(() => users.id),
     resolved: boolean('resolved').notNull().default(false),
+    // required by the GM before a stop can be closed (see GM surface)
+    rootCause: text('root_cause'),
     resolvedBy: uuid('resolved_by').references(() => users.id),
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
     createdAt: createdAt(),
@@ -224,6 +232,7 @@ export const stops = pgTable(
     index('stops_category_idx').on(t.category),
     index('stops_raised_by_idx').on(t.raisedBy),
     index('stops_resolved_by_idx').on(t.resolvedBy),
+    index('stops_opened_at_idx').on(t.openedAt),
   ],
 );
 
