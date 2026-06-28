@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm';
 
 import { db } from './db';
 import { users } from './db/schema';
+import { sendPushToUser } from './web-push';
 
 export type SiteMod = { id: string; name: string } | null;
 
@@ -33,13 +34,23 @@ export async function notifyMod(mod: SiteMod, stopId: string): Promise<void> {
     console.warn(`[push] No MOD found to notify for stop ${stopId}`);
     return;
   }
-  console.info(`[push] (stub) would notify MOD ${mod.name} about stop ${stopId}`);
+  await sendPushToUser(mod.id, {
+    title: 'Line stopped',
+    body: 'A crew member raised a stop. Tap to review.',
+    url: '/gm/stops',
+  });
 }
 
-/**
- * Notify the buyer of an intake rejection.
- * TODO(Prompt 9): real Web Push once subscriptions + VAPID are wired.
- */
+/** Notify the site MOD of an intake rejection (buyer escalation surfaces there). */
 export async function notifyBuyer(siteId: string, ref: string): Promise<void> {
-  console.info(`[push] (stub) would notify buyer for site ${siteId} about ${ref}`);
+  const mod = await findSiteMod(siteId);
+  if (!mod) {
+    console.warn(`[push] No MOD to notify for intake ${ref}`);
+    return;
+  }
+  await sendPushToUser(mod.id, {
+    title: 'Intake rejected',
+    body: 'A delivery line was rejected. Review the supplier scorecard.',
+    url: '/gm',
+  });
 }

@@ -501,6 +501,28 @@ export const auditLog = pgTable(
 );
 
 /* -------------------------------------------------------------------------- */
+/*  push_subscriptions (Web Push)                                              */
+/* -------------------------------------------------------------------------- */
+
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: pk(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('push_subscriptions_endpoint_idx').on(t.endpoint),
+    index('push_subscriptions_user_idx').on(t.userId),
+  ],
+);
+
+/* -------------------------------------------------------------------------- */
 /*  verification_tokens (Auth.js magic-link tokens)                            */
 /* -------------------------------------------------------------------------- */
 
@@ -552,3 +574,5 @@ export type AuditLogEntry = typeof auditLog.$inferSelect;
 export type NewAuditLogEntry = typeof auditLog.$inferInsert;
 export type VerificationToken = typeof verificationTokens.$inferSelect;
 export type NewVerificationToken = typeof verificationTokens.$inferInsert;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type NewPushSubscription = typeof pushSubscriptions.$inferInsert;
