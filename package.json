@@ -11,6 +11,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/lib/db/seed.ts",
     "db:import-standards": "tsx scripts/import-standards.ts",
+    "db:migrate:prod": "tsx scripts/migrate-prod.ts",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -48,6 +51,7 @@
     "shadcn": "^2.10.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.22.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }

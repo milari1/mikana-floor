@@ -124,9 +124,64 @@ tests/
 Deployed on **Vercel**.
 
 1. Push to GitHub (`main` is the production branch).
-2. Import the repo in Vercel.
-3. Add the environment variables from `.env.example` in the Vercel project settings.
+2. Import the repo in Vercel; production branch `main`, preview for all others.
+3. Add the environment variables (below) in the Vercel project settings.
 4. Provision a Postgres database (Neon, via the Vercel integration) and set `POSTGRES_URL`.
-5. Set `NEXTAUTH_URL` to the deployed URL.
+5. Set `NEXTAUTH_URL` / `AUTH_URL` to the deployed URL.
 
 Pushes to `main` trigger production deploys; other branches get preview deploys.
+
+### Database branches per PR
+
+Use **Neon branching** (Vercel Postgres integration) so each PR gets a branch
+forked from production. Point CI's `TEST_POSTGRES_URL` secret at the branch DB.
+
+### Migrations on deploy
+
+`scripts/migrate-prod.ts` runs Drizzle migrations, gated by `RUN_MIGRATIONS=true`,
+exiting non-zero on failure so the deploy can be held:
+
+```bash
+RUN_MIGRATIONS=true npm run db:migrate:prod
+```
+
+Run it from CI on `main` (or a Vercel "deploy hook" / pre-promote step) before
+promoting the build. If it fails, hold the deploy.
+
+### Environment variables
+
+| Variable | Used for |
+| --- | --- |
+| `POSTGRES_URL` | Neon/Vercel Postgres connection |
+| `AUTH_SECRET` (`NEXTAUTH_SECRET`) | Auth.js session/JWT signing |
+| `NEXTAUTH_URL` | Canonical app URL |
+| `RESEND_API_KEY` | Magic-link email (GM+) |
+| `AUTH_RESEND_FROM` | Verified magic-link sender |
+| `OPENAI_API_KEY` | Kaizen Whisper transcription fallback |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push (server) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web Push (browser subscribe) |
+| `VAPID_SUBJECT` | VAPID JWT contact |
+
+## CI
+
+`.github/workflows/ci.yml` runs on every PR and blocks merge on failure:
+
+- **verify** (DB-free): `typecheck`, `lint`, `test:unit` (Vitest), `build`
+- **e2e**: Playwright against a Neon branch DB (`TEST_POSTGRES_URL` secret),
+  after `db:migrate:prod` + `db:seed`
+
+## Incident runbook
+
+**Auth**
+- *Crew can't sign in:* confirm the user has a `pin_hash` at the selected site
+  and is `active`. PINs are bcrypt-compared against users at that `site_id`.
+- *GM magic link fails:* check `RESEND_API_KEY` + `AUTH_RESEND_FROM` (verified
+  domain) and `AUTH_SECRET`. Only `gm`/`director`/`exec`/`auditor` may use it.
+- *Everyone logged out:* a changed `AUTH_SECRET` invalidates all JWTs (8h TTL).
+
+**Push**
+- *MODs not receiving stop alerts:* verify `VAPID_*` keys are set and the MOD
+  has a row in `push_subscriptions`. Dead subscriptions (404/410) are pruned
+  automatically. Push is best-effort — stops are always recorded regardless.
+- *No subscription created:* the browser must grant notification permission and
+  the Service Worker must be registered (production build only).

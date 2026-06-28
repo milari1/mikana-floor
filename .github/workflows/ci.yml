@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Typecheck, lint, unit, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run build
+        env:
+          # Build is DB-free (pages that read the DB are dynamic).
+          AUTH_SECRET: ci-build-secret
+
+  e2e:
+    name: Playwright e2e
+    runs-on: ubuntu-latest
+    # @vercel/postgres speaks Neon's HTTP protocol, so the e2e DB must be a
+    # Neon-compatible endpoint — use a Neon branch DB (matches the per-PR
+    # branch-database strategy). Set TEST_POSTGRES_URL in repo secrets.
+    env:
+      POSTGRES_URL: ${{ secrets.TEST_POSTGRES_URL }}
+      AUTH_SECRET: ci-e2e-secret
+      NEXTAUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: RUN_MIGRATIONS=true npm run db:migrate:prod
+      - run: npm run db:seed
+      - run: npm run build
+      - run: npm run test:e2e
