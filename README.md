@@ -51,10 +51,51 @@ The app runs at http://localhost:3000.
 
 | Script          | Description                  |
 | --------------- | ---------------------------- |
-| `npm run dev`   | Start the dev server         |
-| `npm run build` | Production build             |
-| `npm run start` | Serve the production build   |
-| `npm run lint`  | Run ESLint                   |
+| `npm run dev`              | Start the dev server                    |
+| `npm run build`           | Production build                        |
+| `npm run start`           | Serve the production build              |
+| `npm run lint`            | Run ESLint                              |
+| `npm run db:generate`     | Generate a Drizzle migration            |
+| `npm run db:migrate`      | Apply migrations                        |
+| `npm run db:seed`         | Seed baseline data                      |
+| `npm run db:import-standards` | Import SOPs into the standards table |
+| `npm run test:e2e`        | Run Playwright e2e tests                |
+
+## Importing SOPs into standards
+
+SOPs are authored separately as structured JSON (one file per role/station) and
+imported into the versioned `standards` table, so authoring an SOP fills the
+app's checklist content.
+
+```bash
+npm run db:import-standards -- ./seed/restaurant-prep.standards.json
+```
+
+The file is an array of standards:
+
+```jsonc
+[
+  {
+    "station": "Line Prep",      // station the standard belongs to
+    "phase": "prep",             // opening | prep | service | closing | par-check
+    "version": 1,                // optional; ignored when bumping an existing standard
+    "title": "Line Prep — Mise en Place",
+    "steps": [
+      {
+        "name": "Sanitize station and tools",
+        "detail_md": "Markdown detail shown when the step is expanded.",
+        "photo_url": "https://…"  // optional spec photo
+      }
+    ]
+  }
+]
+```
+
+Import is an upsert keyed by `(station, phase)`. A new version row is inserted
+only when the title or steps changed; `supersedes_id` points at the prior
+version and `effective_at` is set to now. Unchanged standards are skipped.
+Ingredient/par lists use `phase: "par-check"`. The importing user is attributed
+via `IMPORT_AUTHOR_EMAIL` (falls back to a director).
 
 ## Project structure
 

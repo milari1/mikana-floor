@@ -167,7 +167,11 @@ export const standards = pgTable(
     index('standards_supersedes_idx').on(t.supersedesId),
     index('standards_author_idx').on(t.authorId),
     index('standards_approved_by_idx').on(t.approvedBy),
-    uniqueIndex('standards_station_version_idx').on(t.station, t.version),
+    uniqueIndex('standards_station_phase_version_idx').on(
+      t.station,
+      t.phase,
+      t.version,
+    ),
   ],
 );
 

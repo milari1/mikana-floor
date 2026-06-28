@@ -1,0 +1,49 @@
+[
+  {
+    "station": "Line Prep",
+    "phase": "prep",
+    "version": 1,
+    "title": "Line Prep — Mise en Place",
+    "steps": [
+      {
+        "name": "Sanitize station and tools",
+        "detail_md": "Wipe down boards, knives, and rails with sanitizer. Air-dry before use."
+      },
+      {
+        "name": "Pull and date prep list items",
+        "detail_md": "Pull items from the walk-in per today's prep list. Label each with date and initials."
+      },
+      {
+        "name": "Portion proteins to spec",
+        "detail_md": "Weigh proteins to the spec card. Flag any out-of-spec count to the MOD."
+      },
+      {
+        "name": "Stock cold rail to par",
+        "detail_md": "Fill the cold rail to par levels. Keep product below 41°F."
+      }
+    ]
+  },
+  {
+    "station": "Line Prep",
+    "phase": "par-check",
+    "version": 1,
+    "title": "Line Prep — Par / Ingredient Check",
+    "steps": [
+      { "name": "Diced onion — par 2 qt", "detail_md": "Top up if below 1 qt." },
+      { "name": "Chopped garlic — par 1 qt", "detail_md": "Top up if below 0.5 qt." },
+      { "name": "House dressing — par 3 qt", "detail_md": "Make fresh batch if below 1 qt." },
+      { "name": "Lemon wedges — par 1 hotel pan", "detail_md": "Cut fresh; discard any over 24h old." }
+    ]
+  },
+  {
+    "station": "Dish Pit",
+    "phase": "closing",
+    "version": 1,
+    "title": "Dish Pit — Closing",
+    "steps": [
+      { "name": "Break down and clean machine", "detail_md": "Drain, de-scale, and wipe the dish machine." },
+      { "name": "Sanitize floor drains", "detail_md": "Flush and sanitize all floor drains." },
+      { "name": "Restock clean racks", "detail_md": "Return clean racks to the line and prep stations." }
+    ]
+  }
+]
