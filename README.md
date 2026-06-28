@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mikana Floor
 
-## Getting Started
+Operational app for a multi-segment food service company (catering, restaurant,
+institutional, distribution). Mikana Floor embeds 14 management principles in the
+moment of work, surfacing them through role-specific surfaces.
 
-First, run the development server:
+**Design law: the app alerts, humans decide.** The system raises signals and flags
+exceptions; people make the calls.
+
+## Role surfaces
+
+| Surface   | Device   | Notes                          |
+| --------- | -------- | ------------------------------ |
+| Crew      | Phone    | PWA, offline-capable           |
+| GM        | Tablet   |                                |
+| Director  | Desktop  |                                |
+| Auditor   | Any      | Read-only                      |
+
+## Tech stack
+
+- **Framework:** Next.js 14 (App Router), TypeScript (strict)
+- **Styling:** Tailwind CSS, shadcn/ui (Slate base color)
+- **Database:** Vercel Postgres (Neon) via Drizzle ORM
+- **Auth:** Auth.js (next-auth v5)
+- **Email:** Resend
+- **PWA:** Serwist (`@serwist/next`)
+- **Offline storage:** Dexie (IndexedDB)
+- **Icons:** lucide-react
+- **Validation:** Zod
+- **Passwords:** bcryptjs
+
+## Local development
+
+Prerequisites: Node.js 18.18+ (this project was scaffolded on Node 24) and npm.
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env.example .env.local
+# Fill in the values in .env.local
+
+# 3. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script          | Description                  |
+| --------------- | ---------------------------- |
+| `npm run dev`   | Start the dev server         |
+| `npm run build` | Production build             |
+| `npm run start` | Serve the production build   |
+| `npm run lint`  | Run ESLint                   |
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    crew/        # Crew surface (phone, PWA)
+    gm/          # GM surface (tablet)
+    director/    # Director surface (desktop)
+    auditor/     # Auditor surface (read-only)
+    api/         # Route handlers
+  components/
+    ui/          # shadcn/ui primitives
+    crew/        # Crew-specific components
+    gm/          # GM-specific components
+    director/    # Director-specific components
+  lib/
+    db/          # Drizzle schema & client
+tests/
+  e2e/           # End-to-end tests
+  unit/          # Unit tests
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deployed on **Vercel**.
 
-## Deploy on Vercel
+1. Push to GitHub (`main` is the production branch).
+2. Import the repo in Vercel.
+3. Add the environment variables from `.env.example` in the Vercel project settings.
+4. Provision a Postgres database (Neon, via the Vercel integration) and set `POSTGRES_URL`.
+5. Set `NEXTAUTH_URL` to the deployed URL.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Pushes to `main` trigger production deploys; other branches get preview deploys.
