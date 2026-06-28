@@ -85,6 +85,7 @@ export function PinKeypad({
           Site
         </span>
         <select
+          aria-label="Site"
           value={siteId}
           onChange={(e) => setSiteId(e.target.value)}
           disabled={submitting}
